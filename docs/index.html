@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FUEL Map</title>
+    <link rel="apple-touch-icon" sizes="120x120" href="https://widberg.github.io/fuel-map/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://widberg.github.io/fuel-map/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://widberg.github.io/fuel-map/favicon-16x16.png">
+    <link rel="manifest" href="https://widberg.github.io/fuel-map/site.webmanifest">
+    <link rel="mask-icon" href="https://widberg.github.io/fuel-map/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script>
+        function initMap() {
+            const TILE_SIZE = 256;
+			const MAX_NATIVE_ZOOM = 5;
+
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 0, lng: 0 },
+                zoom: 2,
+                backgroundColor: "black",
+                streetViewControl: false,
+                mapTypeControlOptions: {
+                    mapTypeIds: [],
+                },
+            });
+
+            fuelMapType = new google.maps.ImageMapType({
+                getTileUrl: function (coord, zoom) {
+					return (
+						"https://widberg.github.io/fuel-map/map/" +
+						"/" +
+						zoom +
+						"/" +
+						coord.y +
+						"/" +
+						coord.x +
+						".jpg"
+					);
+                },
+                tileSize: new google.maps.Size(TILE_SIZE, TILE_SIZE),
+                minZoom: 1,
+                maxZoom: 9,
+                radius: 65535,
+            });
+			
+			fuelMapType.ImageMapTypeGetTile = fuelMapType.getTile;
+			fuelMapType.getTile = function(coord, zoom, ownerDocument) {
+    			var tileRange = 1 << zoom;
+				if (coord.x < 0 || coord.x >= tileRange || coord.y < 0 || coord.y >= tileRange)
+				{
+					return null;
+				}
+
+				if (zoom > MAX_NATIVE_ZOOM) {
+					const NATIVE_TILE_RANGE = 1 << MAX_NATIVE_ZOOM;
+					var newZoom = zoom - MAX_NATIVE_ZOOM;
+					var newTileRange = 1 << newZoom;
+
+					var subX = coord.x % newTileRange;
+					var subY = coord.y % newTileRange;
+
+					coord.x = Math.floor(coord.x / tileRange * NATIVE_TILE_RANGE);
+					coord.y = Math.floor(coord.y / tileRange * NATIVE_TILE_RANGE);
+
+					var clipSize = Math.floor(TILE_SIZE / newTileRange);
+
+					var top = Math.floor(clipSize * subY);
+					var bottom = TILE_SIZE - top - clipSize - 1;
+					var left = Math.floor(clipSize * subX);
+					var right = TILE_SIZE - left - clipSize - 1;
+
+					var tileContainer = fuelMapType.ImageMapTypeGetTile(coord, MAX_NATIVE_ZOOM, ownerDocument);
+					tileContainer.addEventListener( 'DOMNodeInserted', function (event) {
+						event.target.style.width = (newTileRange * TILE_SIZE) + "px";
+						event.target.style.height = (newTileRange * TILE_SIZE) + "px";
+						event.target.style.top = -(TILE_SIZE * subY) + "px";
+						event.target.style.left = -(TILE_SIZE * subX) + "px";
+						event.target.style.overflow = "hidden";
+						event.target.style.webkitClipPath = "inset("+ top +"px " + right + "px " + bottom + "px " + left + "px)";
+						event.target.style.clipPath = "inset("+ top +"px " + right + "px " + bottom + "px " + left + "px)";
+					}, false);
+
+					return tileContainer;
+				}
+				return fuelMapType.ImageMapTypeGetTile(coord, zoom, ownerDocument);
+			};
+
+            map.mapTypes.set("fuel", fuelMapType);
+            map.setMapTypeId("fuel");
+            
+            const drawingManager = new google.maps.drawing.DrawingManager({
+				map: map,
+                drawingControlOptions: {
+					position: google.maps.ControlPosition.TOP_CENTER,
+					drawingModes: [
+						google.maps.drawing.OverlayType.MARKER,
+						google.maps.drawing.OverlayType.POLYLINE,
+					],
+                },
+                markerOptions: {
+                	icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
+                },
+            });
+        }
+    </script>
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJ3yaZkKZGD62BC4kQ4wg_NCvYTsQdz6U&callback=initMap&libraries=drawing&v=weekly"
+      async
+    ></script>
+  </body>
+</html>
