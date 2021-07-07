@@ -14,15 +14,15 @@
         function initMap() {
             const TILE_SIZE = 256;
 			const MAX_NATIVE_ZOOM = 5;
+			const RADIUS = 65536;
+			const DIAMETER = 2 * RADIUS;
 
             const map = new google.maps.Map(document.getElementById("map"), {
                 center: { lat: 0, lng: 0 },
                 zoom: 2,
                 backgroundColor: "black",
                 streetViewControl: false,
-                mapTypeControlOptions: {
-                    mapTypeIds: [],
-                },
+                mapTypeControl: false,
             });
 
             fuelMapType = new google.maps.ImageMapType({
@@ -41,7 +41,7 @@
                 tileSize: new google.maps.Size(TILE_SIZE, TILE_SIZE),
                 minZoom: 1,
                 maxZoom: 7,
-                radius: 65535,
+				name: "FUEL",
             });
 			
 			fuelMapType.ImageMapTypeGetTile = fuelMapType.getTile;
@@ -86,8 +86,34 @@
 				return fuelMapType.ImageMapTypeGetTile(coord, zoom, ownerDocument);
 			};
 
+			fuelMapType.projection = {
+				fromLatLngToPoint: function (latLng) {
+					var x = (latLng.lng()) * TILE_SIZE + TILE_SIZE / 2;
+					var y = (latLng.lat()) * TILE_SIZE + TILE_SIZE / 2;
+					return new google.maps.Point(x, y);
+				},
+				fromPointToLatLng: function (point, noWrap) {
+					var lng = (point.x / TILE_SIZE) - 0.5;
+					var lat = (point.y / TILE_SIZE) - 0.5;
+					return new google.maps.LatLng(lat, lng, noWrap);
+				},
+			};
+
             map.mapTypes.set("fuel", fuelMapType);
             map.setMapTypeId("fuel");
+// Show the lat and lng under the mouse cursor.
+//   const coordsDiv = document.createElement('div');
+//   coordsDiv.style.backgroundColor = "#FFFFFF";
+//   map.controls[google.maps.ControlPosition.TOP_CENTER].push(coordsDiv);
+//   map.addListener("mousemove", (event) => {
+// 	var coords = fuelMapType.projection.fromLatLngToPoint(event.latLng);
+//     coordsDiv.textContent =
+//       "lng: " +
+//       event.latLng.lng()+
+//       ", " +
+//       "lat: " +
+//       event.latLng.lat() + "; x: " + coords.x + ", y: " + coords.y;
+//   });
             
             const drawingManager = new google.maps.drawing.DrawingManager({
 				map: map,
