@@ -34,20 +34,20 @@ Part of the map that is not "Out of Area" in freeride.
 
 "World" coordinate system; up is north.
 
-Whole map image including transparent border.
+Whole map image excluding transparent border.
 
 <pre>
-          -Y | -65536.0
+          -Y | -65537.0
              |
              |
              |
 -X           | (0, 0)    +X
 -------------+-------------
--65536.0     |     +65536.0
+-65537.0     |     +65535.0
              |
              |
              |
-          +Y | +65536.0
+          +Y | +65535.0
 </pre>
 
 [fuel_map.webp](https://github.com/widberg/fuel-map/blob/master/fuel_map.webp?raw=true) - uncompressed 8192x8192 pixel map image (~66 MB)
