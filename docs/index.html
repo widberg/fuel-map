@@ -31,6 +31,7 @@
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script id="lzutf8" src="https://cdn.jsdelivr.net/npm/lzutf8/build/production/lzutf8.min.js"></script>
     <!-- <script src="roads.js"></script> -->
     <script>
       function initMap() {
@@ -187,10 +188,94 @@
               google.maps.drawing.OverlayType.POLYLINE,
             ],
           },
-          markerOptions: {
-            icon: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
-          },
         });
+        
+        var dataLayer = new google.maps.Data();
+        google.maps.event.addListener(
+          drawingManager,
+          "overlaycomplete",
+          function (event) {
+            switch (event.type) {
+              case google.maps.drawing.OverlayType.MARKER:
+                dataLayer.add(
+                  new google.maps.Data.Feature({
+                    geometry: new google.maps.Data.Point(
+                      event.overlay.getPosition()
+                    ),
+                  })
+                );
+                break;
+              case google.maps.drawing.OverlayType.RECTANGLE:
+                var b = event.overlay.getBounds(),
+                  p = [
+                    b.getSouthWest(),
+                    {
+                      lat: b.getSouthWest().lat(),
+                      lng: b.getNorthEast().lng(),
+                    },
+                    b.getNorthEast(),
+                    {
+                      lng: b.getSouthWest().lng(),
+                      lat: b.getNorthEast().lat(),
+                    },
+                  ];
+                dataLayer.add(
+                  new google.maps.Data.Feature({
+                    geometry: new google.maps.Data.Polygon([p]),
+                  })
+                );
+                break;
+              case google.maps.drawing.OverlayType.POLYGON:
+                dataLayer.add(
+                  new google.maps.Data.Feature({
+                    geometry: new google.maps.Data.Polygon([
+                      event.overlay.getPath().getArray(),
+                    ]),
+                  })
+                );
+                break;
+              case google.maps.drawing.OverlayType.POLYLINE:
+                dataLayer.add(
+                  new google.maps.Data.Feature({
+                    geometry: new google.maps.Data.LineString(
+                      event.overlay.getPath().getArray()
+                    ),
+                  })
+                );
+                break;
+              case google.maps.drawing.OverlayType.CIRCLE:
+                dataLayer.add(
+                  new google.maps.Data.Feature({
+                    properties: {
+                      radius: event.overlay.getRadius(),
+                    },
+                    geometry: new google.maps.Data.Point(
+                      event.overlay.getCenter()
+                    ),
+                  })
+                );
+                break;
+              default:
+                break;
+            }
+          }
+        );
+
+        const button = document.createElement('button');
+        button.innerHTML = "save";
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(button);
+        google.maps.event.addDomListener(button, 'click', function() {
+          dataLayer.toGeoJson(function(obj) {
+            window.location.hash = '#' + LZUTF8.compress(JSON.stringify(obj), {outputEncoding: "Base64"});
+          });
+        });
+
+          var hash = window.location.hash.substr(1);
+          if (hash !== "") {
+            var geoJson = JSON.parse(LZUTF8.decompress(hash, {inputEncoding: "Base64", outputEncoding: "String"}));
+            map.data.addGeoJson(geoJson);
+            dataLayer.addGeoJson(geoJson);
+          }
       }
     </script>
     <style>
