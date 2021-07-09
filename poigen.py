@@ -8,11 +8,8 @@ max_x = 65535.0
 min_y = -65537.0
 max_y = 65535.0
 
-width = (max_x - min_x)
-height = (max_y - min_y)
-
-scale_x = width / (width + 16384 + 512)
-scale_y = height / (height + 16384 + 512)
+scale_x = 65530 / ((max_x - min_x) / 2 + 4096 + 300)
+scale_y = 65530 / ((max_y - min_y) / 2 + 4096 + 300)
 
 def normalize(val, max, min):
     return 0.5 - (val - min) / (max - min)
