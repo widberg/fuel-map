@@ -93,13 +93,6 @@
             coord.x = Math.floor((coord.x / tileRange) * NATIVE_TILE_RANGE);
             coord.y = Math.floor((coord.y / tileRange) * NATIVE_TILE_RANGE);
 
-            var clipSize = Math.floor(TILE_SIZE / newTileRange);
-
-            var top = Math.floor(clipSize * subY);
-            var bottom = TILE_SIZE - top - clipSize - 1;
-            var left = Math.floor(clipSize * subX);
-            var right = TILE_SIZE - left - clipSize - 1;
-
             var tileContainer = fuelMapType.ImageMapTypeGetTile(
               coord,
               MAX_NATIVE_ZOOM,
@@ -113,26 +106,6 @@
                 event.target.style.top = -(TILE_SIZE * subY) + "px";
                 event.target.style.left = -(TILE_SIZE * subX) + "px";
                 event.target.style.overflow = "hidden";
-                event.target.style.webkitClipPath =
-                  "inset(" +
-                  top +
-                  "px " +
-                  right +
-                  "px " +
-                  bottom +
-                  "px " +
-                  left +
-                  "px)";
-                event.target.style.clipPath =
-                  "inset(" +
-                  top +
-                  "px " +
-                  right +
-                  "px " +
-                  bottom +
-                  "px " +
-                  left +
-                  "px)";
               },
               false
             );
