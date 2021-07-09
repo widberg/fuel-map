@@ -31,7 +31,10 @@
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-    <script id="lzutf8" src="https://cdn.jsdelivr.net/npm/lzutf8/build/production/lzutf8.min.js"></script>
+    <script
+      id="lzutf8"
+      src="https://cdn.jsdelivr.net/npm/lzutf8/build/production/lzutf8.min.js"
+    ></script>
     <!-- <script src="roads.js"></script> -->
     <script>
       function initMap() {
@@ -189,7 +192,7 @@
             ],
           },
         });
-        
+
         var dataLayer = new google.maps.Data();
         google.maps.event.addListener(
           drawingManager,
@@ -261,21 +264,50 @@
           }
         );
 
-        const button = document.createElement('button');
-        button.innerHTML = "save";
+        const button = document.createElement("button");
+        button.innerHTML = "share";
         map.controls[google.maps.ControlPosition.TOP_CENTER].push(button);
-        google.maps.event.addDomListener(button, 'click', function() {
-          dataLayer.toGeoJson(function(obj) {
-            window.location.hash = '#' + LZUTF8.compress(JSON.stringify(obj), {outputEncoding: "Base64"});
+        google.maps.event.addDomListener(button, "click", function () {
+          dataLayer.toGeoJson(function (obj) {
+            var link =
+              "https://widberg.github.io/fuel-map#" +
+              LZUTF8.compress(JSON.stringify(obj), {
+                outputEncoding: "Base64",
+              });
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyDy7U7BfHZA0n8T9eMKADNBFrV4GJv61Lo", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+              if (xhr.readyState === 4 && xhr.status === 200) {
+                var json = JSON.parse(xhr.responseText);
+                alert(json.shortLink);
+              }
+            };
+            
+            xhr.send(JSON.stringify({
+              "dynamicLinkInfo": {
+                "domainUriPrefix": "https://fmtk.page.link",
+                "link": link,
+              },
+              "suffix": {
+                "option": "SHORT"
+              }
+            }));
           });
         });
 
-          var hash = window.location.hash.substr(1);
-          if (hash !== "") {
-            var geoJson = JSON.parse(LZUTF8.decompress(hash, {inputEncoding: "Base64", outputEncoding: "String"}));
-            map.data.addGeoJson(geoJson);
-            dataLayer.addGeoJson(geoJson);
-          }
+        var hash = window.location.hash.substr(1);
+        if (hash !== "") {
+          var geoJson = JSON.parse(
+            LZUTF8.decompress(hash, {
+              inputEncoding: "Base64",
+              outputEncoding: "String",
+            })
+          );
+          map.data.addGeoJson(geoJson);
+          dataLayer.addGeoJson(geoJson);
+        }
       }
     </script>
     <style>
