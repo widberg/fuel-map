@@ -165,7 +165,11 @@
 
         map.data.setStyle(function(feature) {
           return {
-            icon: icons[feature.getProperty('category')]
+              icon: {
+              url: icons[feature.getProperty('category')],
+              scaledSize: new google.maps.Size(16, 16),
+              anchor: new google.maps.Point(8, 8)
+            }
           };
         });
 
