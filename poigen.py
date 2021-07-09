@@ -3,6 +3,14 @@ from geojson import Feature, Point, FeatureCollection
 
 FUEL_DIR = 'D:/SteamLibrary/steamapps/common/FUEL/'
 
+min_x = -65537.0
+max_x = 65535.0
+min_y = -65537.0
+max_y = 65535.0
+
+scale_x = 65530 / (max_x + 4096)
+scale_y = 65530 / (max_y + 4096)
+
 def normalize(val, max, min):
     return 0.5 - (val - min) / (max - min)
 
@@ -14,7 +22,7 @@ with open('docs/geo/poi.json', 'w') as output:
         for line in input:
             if line.startswith('AddTypePointOfInterest '):
                 coords = line[23:].split(' ')
-                features.append(Feature(geometry=Point((normalize(float(coords[3]), 65535.0, -65537.0), normalize(float(coords[2]), 65535.0, -65537.0)))))
+                features.append(Feature(geometry=Point((normalize(float(coords[3]) * scale_y, max_y, min_y), normalize(float(coords[2]) * scale_x, max_x, min_x)))))
     with open(FUEL_DIR + 'GameTsc/Story/miss_official.tsc', 'r') as input:
         pass
         # for line in input:
