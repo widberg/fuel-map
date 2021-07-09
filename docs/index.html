@@ -159,9 +159,15 @@
           "https://widberg.github.io/fuel-map/geo/poi.json"
         );
 
+        var icons = {
+          vista: 'img/vista.png'
+        }
+
         map.data.setStyle(function(feature) {
-    return {icon:feature.getProperty('icon')};
-  });
+          return {
+            icon: icons[feature.getProperty('category')]
+          };
+        });
 
 
         const drawingManager = new google.maps.drawing.DrawingManager({
