@@ -159,6 +159,11 @@
           "https://widberg.github.io/fuel-map/geo/poi.json"
         );
 
+        map.data.setStyle(function(feature) {
+    return {icon:feature.getProperty('icon')};
+  });
+
+
         const drawingManager = new google.maps.drawing.DrawingManager({
           map: map,
           drawingControlOptions: {
