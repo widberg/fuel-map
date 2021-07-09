@@ -22,7 +22,7 @@ with open('docs/geo/poi.json', 'w') as output:
         for line in input:
             if line.startswith('AddTypePointOfInterest '):
                 coords = line[23:].split(' ')
-                features.append(Feature(geometry=Point((normalize(float(coords[3]) * scale_y, max_y, min_y), normalize(float(coords[2]) * scale_x, max_x, min_x)))))
+                features.append(Feature(geometry=Point((normalize(float(coords[3]), min_y, max_y) * scale_y, normalize(float(coords[2]), min_x, max_x) * scale_x))))
     with open(FUEL_DIR + 'GameTsc/Story/miss_official.tsc', 'r') as input:
         pass
         # for line in input:
