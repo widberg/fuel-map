@@ -270,9 +270,13 @@
         google.maps.event.addDomListener(button, "click", function () {
           dataLayer.toGeoJson(function (obj) {
             var link =
-              "https://widberg.github.io/fuel-map#" +
+              "https://widberg.github.io/fuel-map/#" +
               LZUTF8.compress(JSON.stringify({
                   version: 0,
+                  position: {
+                    center: map.getCenter(),
+                    zoom: map.getZoom()
+                  },
                   geoJson: obj
                 }), {
                 outputEncoding: "Base64",
@@ -308,8 +312,18 @@
               outputEncoding: "String",
             })
           );
-          map.data.addGeoJson(data.geoJson);
-          dataLayer.addGeoJson(data.geoJson);
+
+          if (data.version === 0) {
+            if (data.geoJson) {
+              map.data.addGeoJson(data.geoJson);
+              dataLayer.addGeoJson(data.geoJson);
+            }
+
+            if (data.position) {
+              map.setCenter(data.position.center);
+              map.setZoom(data.position.zoom);
+            }
+          }
         }
       }
     </script>
