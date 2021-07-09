@@ -8,8 +8,8 @@ max_x = 65535.0
 min_y = -65537.0
 max_y = 65535.0
 
-scale_x = 65530 / (max_x + 4096)
-scale_y = 65530 / (max_y + 4096)
+scale_x = 65530 / ((max_x - min_x) / 2 + 4096)
+scale_y = 65530 / ((max_y - min_y) / 2 + 4096)
 
 def normalize(val, max, min):
     return 0.5 - (val - min) / (max - min)
@@ -22,7 +22,7 @@ with open('docs/geo/poi.json', 'w') as output:
         for line in input:
             if line.startswith('AddTypePointOfInterest '):
                 coords = line[23:].split(' ')
-                features.append(Feature(geometry=Point((normalize(float(coords[2]), min_y, max_y) * scale_y, normalize(float(coords[3]), min_x, max_x) * scale_x))))
+                features.append(Feature(geometry=Point((normalize(float(coords[2]), min_x, max_x) * scale_x, normalize(float(coords[3]), min_y, max_y) * scale_y))))
     with open(FUEL_DIR + 'GameTsc/Story/miss_official.tsc', 'r') as input:
         pass
         # for line in input:
