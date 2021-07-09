@@ -16,7 +16,7 @@ struct PositionVector // sizeof() = 12
 ```
 "In Area" coordinate system; up is north.
 
-Part of the map that is not "Out of Area" in freeride.
+Part of the map that is not "Out of Area" in freeride. Alpha 1.
 
 <pre>
           -Y | -65530.0
@@ -34,7 +34,7 @@ Part of the map that is not "Out of Area" in freeride.
 
 "World" coordinate system; up is north.
 
-Whole map image excluding transparent border.
+Whole map image excluding transparent border. Alpha > 0.
 
 <pre>
           -Y | -65537.0
