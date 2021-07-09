@@ -271,7 +271,10 @@
           dataLayer.toGeoJson(function (obj) {
             var link =
               "https://widberg.github.io/fuel-map#" +
-              LZUTF8.compress(JSON.stringify(obj), {
+              LZUTF8.compress(JSON.stringify({
+                  version: 0,
+                  geoJson: obj
+                }), {
                 outputEncoding: "Base64",
               });
             
@@ -299,14 +302,14 @@
 
         var hash = window.location.hash.substr(1);
         if (hash !== "") {
-          var geoJson = JSON.parse(
+          var data = JSON.parse(
             LZUTF8.decompress(hash, {
               inputEncoding: "Base64",
               outputEncoding: "String",
             })
           );
-          map.data.addGeoJson(geoJson);
-          dataLayer.addGeoJson(geoJson);
+          map.data.addGeoJson(data.geoJson);
+          dataLayer.addGeoJson(data.geoJson);
         }
       }
     </script>
