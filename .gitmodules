@@ -1,0 +1,6 @@
+[submodule "heightmap/dependencies/CImg"]
+	path = heightmap/dependencies/CImg
+	url = https://github.com/GreycLab/CImg.git
+[submodule "heightmap/dependencies/CLI11"]
+	path = heightmap/dependencies/CLI11
+	url = https://github.com/CLIUtils/CLI11.git
