@@ -16,7 +16,54 @@ struct LookupDescription {
     std::uint32_t b : 20;
 };
 
-void lookup_float(std::uint32_t x, std::uint32_t y, std::uint32_t num,
+float lookup_float(std::uint32_t x, std::uint32_t y, std::uint32_t num,
+                  std::uint32_t limit, std::uint32_t *float_data,
+                  LookupDescription *lookup) {
+  std::uint32_t *float_data_negative_ptr = float_data - limit * 2;
+
+  LookupDescription *lookup_1 = &lookup[(x / 4) + num * (y / 4)];
+
+  std::uint32_t four_times_sub_y = 4 * (y % 4);
+  LookupDescription lookup_desc = lookup_1[0];
+  LookupDescription lookup_desc_1 = lookup_1[1];
+  switch (x % 4) {
+  case 0: {
+    if (lookup_desc.b < limit) {
+      std::uint8_t *v17 = (std::uint8_t *)&float_data[2 * lookup_desc.b] + (four_times_sub_y >> 1);
+      return lookup_desc.a + (v17[0] >> 4);
+    }
+    std::uint8_t *v14 = (std::uint8_t *)float_data_negative_ptr + four_times_sub_y + 16 * lookup_desc.b;
+    return lookup_desc.a + v14[0];
+  }
+  case 1: {
+    if (lookup_desc.b < limit) {
+      std::uint8_t *v21 = (std::uint8_t *)&float_data[2 * lookup_desc.b] + ((four_times_sub_y + 1) >> 1);
+      return lookup_desc.a + (v21[0] & 0xF);
+    }
+    std::uint8_t *v19 = (std::uint8_t *)float_data_negative_ptr + four_times_sub_y + 16 * lookup_desc.b + 1;
+    return lookup_desc.a + v19[0];
+  }
+  case 2: {
+    if (lookup_desc.b < limit) {
+      std::uint8_t *v25 = (std::uint8_t *)&float_data[2 * lookup_desc.b] + ((four_times_sub_y + 2) >> 1);
+      return lookup_desc.a + (v25[0] >> 4);
+    }
+    std::uint32_t v24 = four_times_sub_y + 16 * lookup_desc.b;
+    return lookup_desc.a + *((std::uint8_t *)float_data_negative_ptr + v24 + 2);
+  }
+  case 3: {
+    if (lookup_desc.b < limit)
+      return lookup_desc.a + (*((std::uint8_t *)&float_data[2 * lookup_desc.b] + ((four_times_sub_y + 3) >> 1)) & 0xF);
+    return lookup_desc.a + *((std::uint8_t *)&float_data_negative_ptr[4 * lookup_desc.b] + four_times_sub_y + 3);
+  }
+  default:
+    break;
+  }
+
+  return 0;
+}
+
+void lookup_4x4_floats(std::uint32_t x, std::uint32_t y, std::uint32_t num,
                   std::uint32_t limit, std::uint32_t *float_data,
                   LookupDescription *lookup, float result[4][4]) {
   std::uint32_t *float_data_negative_ptr = float_data - limit * 2;
@@ -148,28 +195,12 @@ int main() {
   float max = 1892;
   float min = 8;
 
-  CImg<float> image(width, width, 1, 3, 0);
+  CImg<float> image(width, width, 1, 1, 0);
 
-  float result[4][4];
-
-  for (std::uint32_t x = 0; x < width - 3; ++x) {
-    for (std::uint32_t y = 0; y < width - 3; ++y) {
-      lookup_float(x, y, num, limit, float_data, lookup, result);
-      std::uint32_t i_max = 1;
-      std::uint32_t j_max = 1;
-      if (x == width - 4) {
-        i_max = 4;
-      }
-      if (y == width - 4) {
-        j_max = 4;
-      }
-      for (std::uint32_t i = 0; i < i_max; ++i) {
-        for (std::uint32_t j = 0; j < j_max; ++j) {
-          for (std::uint32_t k = 0; k < 3; ++k) {
-            image(x + i, y + j, k) = result[i][j];
-          }
-        }
-      }
+  for (std::uint32_t x = 0; x < width; ++x) {
+    for (std::uint32_t y = 0; y < width; ++y) {
+      float h = lookup_float(x, y, num, limit, float_data, lookup);
+      image(x, y) = h;
     }
   }
 
