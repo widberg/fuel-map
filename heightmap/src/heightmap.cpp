@@ -16,53 +16,7 @@ struct LookupDescription {
     std::uint32_t b : 20;
 };
 
-float lookup_float(std::uint32_t x, std::uint32_t y, std::uint32_t num,
-                  std::uint32_t limit, std::uint32_t *float_data,
-                  LookupDescription *lookup) {
-  std::uint32_t *float_data_negative_ptr = float_data - limit * 2;
-
-  LookupDescription *lookup_1 = &lookup[(x / 4) + num * (y / 4)];
-
-  std::uint32_t four_times_sub_y = 4 * (y % 4);
-  LookupDescription lookup_desc = lookup_1[0];
-  LookupDescription lookup_desc_1 = lookup_1[1];
-  switch (x % 4) {
-  case 0: {
-    if (lookup_desc.b < limit) {
-      std::uint8_t *v17 = (std::uint8_t *)&float_data[2 * lookup_desc.b] + (four_times_sub_y >> 1);
-      return lookup_desc.a + (v17[0] >> 4);
-    }
-    std::uint8_t *v14 = (std::uint8_t *)float_data_negative_ptr + four_times_sub_y + 16 * lookup_desc.b;
-    return lookup_desc.a + v14[0];
-  }
-  case 1: {
-    if (lookup_desc.b < limit) {
-      std::uint8_t *v21 = (std::uint8_t *)&float_data[2 * lookup_desc.b] + ((four_times_sub_y + 1) >> 1);
-      return lookup_desc.a + (v21[0] & 0xF);
-    }
-    std::uint8_t *v19 = (std::uint8_t *)float_data_negative_ptr + four_times_sub_y + 16 * lookup_desc.b + 1;
-    return lookup_desc.a + v19[0];
-  }
-  case 2: {
-    if (lookup_desc.b < limit) {
-      std::uint8_t *v25 = (std::uint8_t *)&float_data[2 * lookup_desc.b] + ((four_times_sub_y + 2) >> 1);
-      return lookup_desc.a + (v25[0] >> 4);
-    }
-    std::uint32_t v24 = four_times_sub_y + 16 * lookup_desc.b;
-    return lookup_desc.a + *((std::uint8_t *)float_data_negative_ptr + v24 + 2);
-  }
-  case 3: {
-    if (lookup_desc.b < limit)
-      return lookup_desc.a + (*((std::uint8_t *)&float_data[2 * lookup_desc.b] + ((four_times_sub_y + 3) >> 1)) & 0xF);
-    return lookup_desc.a + *((std::uint8_t *)&float_data_negative_ptr[4 * lookup_desc.b] + four_times_sub_y + 3);
-  }
-  default:
-    break;
-  }
-
-  return 0;
-}
-
+/// This function is a cleaned up decompilation of the original function in the game
 void lookup_4x4_floats(std::uint32_t x, std::uint32_t y, std::uint32_t num,
                   std::uint32_t limit, std::uint32_t *float_data,
                   LookupDescription *lookup, float result[4][4]) {
@@ -157,6 +111,25 @@ void lookup_4x4_floats(std::uint32_t x, std::uint32_t y, std::uint32_t num,
       lookup_1 += num;
     }
   }
+}
+
+/// This function is based on lookup_4x4_floats and looks up the value at a single point
+float lookup_float(std::uint32_t x, std::uint32_t y, std::uint32_t num,
+                  std::uint32_t limit, std::uint32_t *float_data,
+                  LookupDescription *lookup) {
+  LookupDescription lookup_desc = lookup[(x / 4) + num * (y / 4)];
+  std::uint32_t c = (4 * (y % 4)) + x % 4;
+
+  if (lookup_desc.b < limit) {
+    std::uint8_t a = *((std::uint8_t *)&float_data[2 * lookup_desc.b] + c / 2);
+    if (x % 2 == 0)
+      return lookup_desc.a + (a >> 4);
+    return lookup_desc.a + (a & 0xF);
+  }
+
+  std::uint32_t *float_data_negative_ptr = float_data - limit * 2;
+  std::uint8_t b = *((std::uint8_t *)&float_data_negative_ptr[4 * lookup_desc.b] + c);
+  return lookup_desc.a + b;
 }
 
 int main() {
