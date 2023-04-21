@@ -6,20 +6,23 @@ Notes and assets related to FUEL's map.
 
 ## Notes
 
+While some in-game development menus will swap the names of the y and z components, the data is stored in the order of the `Vec3f` struct bellow assuming +Y is up, +X is east, and +Z is south. See the [fmtk wiki Coordinate Systems entry](https://github.com/widberg/fmtk/wiki/Coordinate-Systems) for more information.
+
 ```cpp
-struct PositionVector // sizeof() = 12
+struct Vec3f
 {
     float x;
-    float z;
     float y;
+    float z;
 };
 ```
-"In Area" coordinate system; up is north.
 
-Part of the map that is not "Out of Area" in freeride. Alpha 1.
+"In Area" coordinate system; -Z is north.
+
+Part of the map that is not "Out of Area" in freeride. `Alpha = 1`.
 
 <pre>
-          -Y | -65530.0
+          -Z | -65530.0
              |
              |
              |
@@ -29,15 +32,15 @@ Part of the map that is not "Out of Area" in freeride. Alpha 1.
              |
              |
              |
-          +Y | +65530.0
+          +Z | +65530.0
 </pre>
 
-"World" coordinate system; up is north.
+"World" coordinate system; -Z is north.
 
-Whole map image excluding transparent border. Alpha > 0.
+Whole map image excluding transparent border. `0 < Alpha < 1`.
 
 <pre>
-          -Y | -65537.0
+          -Z | -65537.0
              |
              |
              |
@@ -47,11 +50,13 @@ Whole map image excluding transparent border. Alpha > 0.
              |
              |
              |
-          +Y | +65535.0
+          +Z | +65535.0
 </pre>
 
 [fuel_map.webp](https://github.com/widberg/fuel-map/blob/master/fuel_map.webp?raw=true) - uncompressed 8192x8192 pixel map image (~66 MB)
 
 [roads.txt](https://github.com/widberg/fuel-map/blob/master/roads.txt?raw=true) - dump of the road data (~52 MB)
+
+[binary_maps](https://github.com/widberg/fuel-map/blob/master/docs/binary_maps) - visualizations of the height and terrain type maps
 
 Hubs, Liveries, Races, etc. can be gathered from the game's tsc files.
