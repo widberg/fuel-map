@@ -2,355 +2,57 @@
 <html>
   <head>
     <title>FUEL Map</title>
-    <link
-      rel="apple-touch-icon"
-      sizes="120x120"
-      href="https://widberg.github.io/fuel-map/apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="https://widberg.github.io/fuel-map/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="https://widberg.github.io/fuel-map/favicon-16x16.png"
-    />
-    <link
-      rel="manifest"
-      href="https://widberg.github.io/fuel-map/site.webmanifest"
-    />
-    <link
-      rel="mask-icon"
-      href="https://widberg.github.io/fuel-map/safari-pinned-tab.svg"
-      color="#5bbad5"
-    />
+    <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-    <script
-      id="lzutf8"
-      src="https://cdn.jsdelivr.net/npm/lzutf8/build/production/lzutf8.min.js"
-    ></script>
-    <!-- <script src="roads.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-polyfills/0.1.43/polyfill.min.js" integrity="sha512-lvWiOP+aMKHllm4THsjzNleVuGOh0WGniJ3lgu/nvCbex1LlaQSxySUjAu/LTJw9FhnSL/PVYoQcckg1Q03+fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.js" integrity="sha512-O7kHS9ooekX8EveiC94z9xSvD/4xt10Qigl6uEKvspYykdux3Ci5QNu5fwi4ca0ZkZI/oCgx5ja8RklWUEqzxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css" integrity="sha512-D2c/nmSVlwoZk29SLwJK8GkLyCyPuNbZ/vZQL/lNzw+o+yXzsbnJt7lK/iCfdBmgyLRDi0qx27gpE8Zb1C6I7g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script>
-      function initMap() {
-        const TILE_SIZE = 256;
-        const MAX_NATIVE_ZOOM = 5;
-        const RADIUS = 65536;
-        const DIAMETER = 2 * RADIUS;
-
-        const map = new google.maps.Map(document.getElementById("map"), {
-          center: { lat: 0, lng: 0 },
-          zoom: 2,
-          backgroundColor: "black",
-          streetViewControl: false,
-          mapTypeControl: false,
-        });
-
-        fuelMapType = new google.maps.ImageMapType({
-          getTileUrl: function (coord, zoom) {
-            return (
-              "https://widberg.github.io/fuel-map/map/" +
-              "/" +
-              zoom +
-              "/" +
-              coord.y +
-              "/" +
-              coord.x +
-              ".jpg"
-            );
-          },
-          tileSize: new google.maps.Size(TILE_SIZE, TILE_SIZE),
-          minZoom: 1,
-          maxZoom: 7,
-          name: "FUEL",
-        });
-
-        fuelMapType.ImageMapTypeGetTile = fuelMapType.getTile;
-        fuelMapType.getTile = function (coord, zoom, ownerDocument) {
-          var tileRange = 1 << zoom;
-          if (
-            coord.x < 0 ||
-            coord.x >= tileRange ||
-            coord.y < 0 ||
-            coord.y >= tileRange
-          ) {
-            return null;
-          }
-
-          if (zoom > MAX_NATIVE_ZOOM) {
-            const NATIVE_TILE_RANGE = 1 << MAX_NATIVE_ZOOM;
-            var newZoom = zoom - MAX_NATIVE_ZOOM;
-            var newTileRange = 1 << newZoom;
-
-            var subX = coord.x % newTileRange;
-            var subY = coord.y % newTileRange;
-
-            coord.x = Math.floor((coord.x / tileRange) * NATIVE_TILE_RANGE);
-            coord.y = Math.floor((coord.y / tileRange) * NATIVE_TILE_RANGE);
-
-            var tileContainer = fuelMapType.ImageMapTypeGetTile(
-              coord,
-              MAX_NATIVE_ZOOM,
-              ownerDocument
-            );
-            tileContainer.addEventListener(
-              "DOMNodeInserted",
-              function (event) {
-                event.target.style.width = newTileRange * TILE_SIZE + "px";
-                event.target.style.height = newTileRange * TILE_SIZE + "px";
-                event.target.style.top = -(TILE_SIZE * subY) + "px";
-                event.target.style.left = -(TILE_SIZE * subX) + "px";
-                event.target.style.overflow = "hidden";
-              },
-              false
-            );
-
-            return tileContainer;
-          }
-          return fuelMapType.ImageMapTypeGetTile(coord, zoom, ownerDocument);
-        };
-
-        fuelMapType.projection = {
-          fromLatLngToPoint: function (latLng) {
-            var x = latLng.lng() * TILE_SIZE + TILE_SIZE / 2;
-            var y = latLng.lat() * TILE_SIZE + TILE_SIZE / 2;
-            return new google.maps.Point(x, y);
-          },
-          fromPointToLatLng: function (point, noWrap) {
-            var lng = point.x / TILE_SIZE - 0.5;
-            var lat = point.y / TILE_SIZE - 0.5;
-            return new google.maps.LatLng(lat, lng, noWrap);
-          },
-        };
-
-        map.mapTypes.set("fuel", fuelMapType);
-        map.setMapTypeId("fuel");
-        //Show the lat and lng under the mouse cursor.
-        // const coordsDiv = document.createElement('div');
-        // coordsDiv.style.backgroundColor = "#FFFFFF";
-        // map.controls[google.maps.ControlPosition.TOP_CENTER].push(coordsDiv);
-        // map.addListener("mousemove", (event) => {
-        // var coords = fuelMapType.projection.fromLatLngToPoint(event.latLng);
-        //   coordsDiv.textContent =
-        //     "lng: " +
-        //     event.latLng.lng()+
-        //     ", " +
-        //     "lat: " +
-        //     event.latLng.lat() + "; x: " + coords.x + ", y: " + coords.y;
-        // });
-
-        // for (road of window.roads) {
-        //   const flightPath = new google.maps.Polyline({
-        //     path: road,
-        //     geodesic: true,
-        //     strokeColor: "#FF0000",
-        //     strokeOpacity: 1.0,
-        //     strokeWeight: 2,
-        //     map: map,
-        //   });
-        // }
-
-        map.data.loadGeoJson(
-          "https://widberg.github.io/fuel-map/geo/poi.json"
-        );
-
-        var icons = {
-          vista: 'img/vista.png'
-        }
-
-        map.data.setStyle(function(feature) {
-          return {
-              icon: {
-              url: icons[feature.getProperty('category')],
-              scaledSize: new google.maps.Size(16, 16),
-              anchor: new google.maps.Point(8, 8)
-            }
-          };
-        });
-
-
-        const drawingManager = new google.maps.drawing.DrawingManager({
-          map: map,
-          drawingControlOptions: {
-            position: google.maps.ControlPosition.TOP_CENTER,
-            drawingModes: [
-              google.maps.drawing.OverlayType.MARKER,
-              google.maps.drawing.OverlayType.POLYLINE,
-            ],
-          },
-        });
-
-        var dataLayer = new google.maps.Data();
-        google.maps.event.addListener(
-          drawingManager,
-          "overlaycomplete",
-          function (event) {
-            switch (event.type) {
-              case google.maps.drawing.OverlayType.MARKER:
-                dataLayer.add(
-                  new google.maps.Data.Feature({
-                    geometry: new google.maps.Data.Point(
-                      event.overlay.getPosition()
-                    ),
-                  })
-                );
-                break;
-              case google.maps.drawing.OverlayType.RECTANGLE:
-                var b = event.overlay.getBounds(),
-                  p = [
-                    b.getSouthWest(),
-                    {
-                      lat: b.getSouthWest().lat(),
-                      lng: b.getNorthEast().lng(),
-                    },
-                    b.getNorthEast(),
-                    {
-                      lng: b.getSouthWest().lng(),
-                      lat: b.getNorthEast().lat(),
-                    },
-                  ];
-                dataLayer.add(
-                  new google.maps.Data.Feature({
-                    geometry: new google.maps.Data.Polygon([p]),
-                  })
-                );
-                break;
-              case google.maps.drawing.OverlayType.POLYGON:
-                dataLayer.add(
-                  new google.maps.Data.Feature({
-                    geometry: new google.maps.Data.Polygon([
-                      event.overlay.getPath().getArray(),
-                    ]),
-                  })
-                );
-                break;
-              case google.maps.drawing.OverlayType.POLYLINE:
-                dataLayer.add(
-                  new google.maps.Data.Feature({
-                    geometry: new google.maps.Data.LineString(
-                      event.overlay.getPath().getArray()
-                    ),
-                  })
-                );
-                break;
-              case google.maps.drawing.OverlayType.CIRCLE:
-                dataLayer.add(
-                  new google.maps.Data.Feature({
-                    properties: {
-                      radius: event.overlay.getRadius(),
-                    },
-                    geometry: new google.maps.Data.Point(
-                      event.overlay.getCenter()
-                    ),
-                  })
-                );
-                break;
-              default:
-                break;
-            }
-          }
-        );
-
-        const button = document.createElement("button");
-        button.innerHTML = "share";
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(button);
-        google.maps.event.addDomListener(button, "click", function () {
-          dataLayer.toGeoJson(function (obj) {
-            var link =
-              "https://widberg.github.io/fuel-map/#" +
-              LZUTF8.compress(JSON.stringify({
-                  version: 0,
-                  position: {
-                    center: map.getCenter(),
-                    zoom: map.getZoom()
-                  },
-                  geoJson: obj
-                }), {
-                outputEncoding: "Base64",
-              });
-            
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyDy7U7BfHZA0n8T9eMKADNBFrV4GJv61Lo", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onreadystatechange = function () {
-              if (xhr.readyState === 4 && xhr.status === 200) {
-                var json = JSON.parse(xhr.responseText);
-                alert(json.shortLink);
-              }
-            };
-            
-            xhr.send(JSON.stringify({
-              "dynamicLinkInfo": {
-                "domainUriPrefix": "https://fmtk.page.link",
-                "link": link,
-              },
-              "suffix": {
-                "option": "SHORT"
-              }
-            }));
-          });
-        });
-
-        
-        const clearButton = document.createElement("button");
-        clearButton.innerHTML = "clear";
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(clearButton);
-        google.maps.event.addDomListener(clearButton, "click", function () {
-          window.location.hash = '';
-          window.location.reload();
-        });
-
-        var hash = window.location.hash.substr(1);
-        if (hash !== "") {
-          var data = JSON.parse(
-            LZUTF8.decompress(hash, {
-              inputEncoding: "Base64",
-              outputEncoding: "String",
+      document.addEventListener("DOMContentLoaded", function() {
+        new ol.Map({
+          target: 'map',
+          layers: [
+            new ol.layer.Tile({
+              source: new ol.source.XYZ({
+                url: 'tile/{z}/{x}/{y}.png',
+                maxZoom: 5,
+                tileSize: 256,
+                wrapX: false
+              })
             })
-          );
-
-          if (data.version === 0) {
-            if (data.geoJson) {
-              map.data.addGeoJson(data.geoJson);
-              dataLayer.addGeoJson(data.geoJson);
-            }
-
-            if (data.position) {
-              map.setCenter(data.position.center);
-              map.setZoom(data.position.zoom);
-            }
-          }
-        }
-      }
+          ],
+          view: new ol.View({
+            center: [0, 0],
+            zoom: 2,
+            minZoom: 0,
+            maxZoom: 10
+          })
+        });
+      });
     </script>
     <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      #map {
-        height: 100%;
-      }
-
-      /* Optional: Makes the sample page fill the window. */
-      html,
-      body {
-        height: 100%;
+      html, body {
         margin: 0;
         padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background-color: black;
+      }
+
+      #map {
+        height: 100%;
+        width: 100%;
+        background-color: black;
       }
     </style>
   </head>
   <body>
     <div id="map"></div>
-
-    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
-    <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCJ3yaZkKZGD62BC4kQ4wg_NCvYTsQdz6U&callback=initMap&libraries=drawing&v=weekly"
-      async
-    ></script>
   </body>
 </html>
