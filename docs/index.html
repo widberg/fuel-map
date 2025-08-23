@@ -56,6 +56,17 @@
           }
         );
 
+        function style(feature) {
+          return {
+            Point: new ol.style.Style({
+              image: new ol.style.Icon({
+                src: `img/${feature.get("category")}.png`,
+                scale: 0.25,
+              }),
+            }),
+          }[feature.getGeometry().getType()];
+        }
+
         const map = new ol.Map({
           target: "map",
           layers: [
@@ -79,28 +90,101 @@
                 projection: projection,
               }),
             }),
-            new ol.layer.Vector({
-              title: "POIs",
-              visible: true,
-              source: new ol.source.Vector({
-                url: "geo/poi.json",
-                format: new ol.format.GeoJSON({
-                  dataProjection: projection,
-                }),
-                wrapX: false,
-                projection: projection,
-              }),
-              style: function (feature) {
-                return {
-                  Point: new ol.style.Style({
-                    image: new ol.style.Circle({
-                      radius: 5,
-                      fill: null,
-                      stroke: new ol.style.Stroke({ color: "red", width: 1 }),
+            new ol.layer.Group({
+              title: "Points of Interest",
+              layers: [
+                new ol.layer.Vector({
+                  title: "Vista Points",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/vp.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
                     }),
+                    wrapX: false,
+                    projection: projection,
                   }),
-                }[feature.getGeometry().getType()];
-              },
+                  style: style,
+                }),
+                new ol.layer.Vector({
+                  title: "Liveries",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/livery.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
+                  title: "Heliports",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/teleport.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
+                  title: "Career Races",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/career.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
+                  title: "Challenge Races",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/challenge.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
+                  title: "Indian Races",
+                  visible: false,
+                  source: new ol.source.Vector({
+                    url: "geo/indian.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
+                  title: "Camps",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/hub.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+              ]
             }),
           ],
           view: new ol.View({
@@ -119,10 +203,10 @@
         });
         map.addControl(layerSwitcher);
 
-        // map.on("click", function (event) {
-        //   var point = map.getCoordinateFromPixel(event.pixel);
-        //   console.log(point);
-        // });
+        map.on("click", function (event) {
+          var point = map.getCoordinateFromPixel(event.pixel);
+          console.log([point[0], -point[1]]);
+        });
       });
     </script>
     <style>
