@@ -70,6 +70,14 @@
                 width: 4,
               }),
             }),
+            Polygon: new ol.style.Style({
+              fill: new ol.style.Fill({
+                color: {
+                  waterbody: [0, 0, 256, 256],
+                  pool: [173, 216, 230, 256],
+                }[feature.get("category")],
+              }),
+            }),
           }[feature.getGeometry().getType()];
         }
 
@@ -97,7 +105,40 @@
               }),
             }),
             new ol.layer.Group({
+              title: "Water",
+              visible: false,
+              layers: [
+                new ol.layer.Vector({
+                  title: "Waterbody",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/waterbody.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
+                  title: "Pool",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/pool.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+              ],
+            }),
+            new ol.layer.Group({
               title: "Roads",
+              visible: false,
               layers: [
                 new ol.layer.Vector({
                   title: "Roads",

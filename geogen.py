@@ -1,5 +1,5 @@
 import geojson
-from geojson import Feature, Point, FeatureCollection, LineString
+from geojson import Feature, Point, FeatureCollection, LineString, Polygon
 import json
 import shlex
 
@@ -137,3 +137,70 @@ with open(
         )
     with open("docs/geo/road.geojson", "w") as output:
         geojson.dump(FeatureCollection(features_road), output, separators=(",", ":"))
+
+with open("docs/geo/waterbody.geojson", "w") as output:
+    features_water = []
+    # 0x006FFDD0
+    for x, h, z, r in [
+        # stock_lakes_100
+        [410.0, 1770.0, 1683.0, 7000.0],
+        [-50480.0, 755.0, -24970.0, 7000.0],
+        [-35408.0, 700.0, -29217.0, 7000.0],
+        [49250.0, 760.0, 9033.0, 16000.0],
+        [-56250.0, 960.0, -530.0, 14000.0],
+        [-39600.0, 1595.0, 26050.0, 7000.0],
+        [-13900.0, 1350.0, 46000.0, 9000.0],
+        [-60000.0, 550.0, -60000.0, 12000.0],
+    ]:
+        features_water.append(
+            Feature(
+                geometry=Polygon(
+                    [
+                        [
+                            [x - r, z - r],
+                            [x - r, z + r],
+                            [x + r, z + r],
+                            [x + r, z - r],
+                            [x - r, z - r],
+                        ]
+                    ]
+                ),
+                properties={"category": "waterbody"},
+            )
+        )
+    geojson.dump(FeatureCollection(features_water), output, separators=(",", ":"))
+
+with open("docs/geo/pool.geojson", "w") as output:
+    features_water = []
+    # 0x006FFDD0
+    for x, h, z, r in [
+        # stock_lakes_sradius_0_0_625
+        [-27039.0, 787.0, -28552.0, 100.0],
+        [-27450.0, 785.0, -28500.0, 130.0],
+        [-27394.0, 779.0, -28697.0, 100.0],
+        [-58354.68, 979.19, 2106.0901, 100.0],
+        [-58166.539, 976.64001, 1948.2, 100.0],
+        [-58093.379, 981.81, 1596.13, 100.0],
+        [-57740.191, 972.60999, 940.78998, 100.0],
+        [-57511.551, 965.54999, 880.25, 100.0],
+        [-57509.59, 960.23999, 642.73999, 100.0],
+        [-57462.629, 960.85999, 419.54999, 100.0],
+        [-57274.5, 959.53998, 536.01001, 100.0],
+    ]:
+        features_water.append(
+            Feature(
+                geometry=Polygon(
+                    [
+                        [
+                            [x - r, z - r],
+                            [x - r, z + r],
+                            [x + r, z + r],
+                            [x + r, z - r],
+                            [x - r, z - r],
+                        ]
+                    ]
+                ),
+                properties={"category": "pool"},
+            )
+        )
+    geojson.dump(FeatureCollection(features_water), output, separators=(",", ":"))
