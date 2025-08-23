@@ -64,6 +64,12 @@
                 scale: 0.25,
               }),
             }),
+            LineString: new ol.style.Style({
+              stroke: new ol.style.Stroke({
+                color: "green",
+                width: 4,
+              }),
+            }),
           }[feature.getGeometry().getType()];
         }
 
@@ -89,6 +95,24 @@
                 wrapX: false,
                 projection: projection,
               }),
+            }),
+            new ol.layer.Group({
+              title: "Roads",
+              layers: [
+                new ol.layer.Vector({
+                  title: "Roads",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/road.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+              ],
             }),
             new ol.layer.Group({
               title: "Points of Interest",
@@ -172,6 +196,19 @@
                   style: style,
                 }),
                 new ol.layer.Vector({
+                  title: "Hidden Races",
+                  visible: false,
+                  source: new ol.source.Vector({
+                    url: "geo/hidden.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
                   title: "Camps",
                   visible: true,
                   source: new ol.source.Vector({
@@ -184,7 +221,7 @@
                   }),
                   style: style,
                 }),
-              ]
+              ],
             }),
           ],
           view: new ol.View({
