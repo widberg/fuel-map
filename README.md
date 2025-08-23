@@ -17,9 +17,9 @@ struct Vec3f
 };
 ```
 
-"In Area" coordinate system; -Z is north.
+-Z is north.
 
-Part of the map that is not "Out of Area" in freeride. `Alpha = 1`.
+Part of the map that is not "Out of Area" in freeride.
 
 <pre>
           -Z | -65530.0
@@ -35,22 +35,20 @@ Part of the map that is not "Out of Area" in freeride. `Alpha = 1`.
           +Z | +65530.0
 </pre>
 
-"World" coordinate system; -Z is north.
-
-Whole map image excluding transparent border. `0 < Alpha < 1`.
+Whole `fuel_map.webp` image including "Out of Area".
 
 <pre>
-          -Z | -65537.0
+          -Z | -70000.0
              |
              |
              |
 -X           | (0, 0)    +X
 -------------+-------------
--65537.0     |     +65535.0
+-70000.0     |     +70000.0
              |
              |
              |
-          +Z | +65535.0
+          +Z | +70000.0
 </pre>
 
 [fuel_map.webp](https://github.com/widberg/fuel-map/blob/master/fuel_map.webp?raw=true) - uncompressed 8192x8192 pixel map image (~66 MB)

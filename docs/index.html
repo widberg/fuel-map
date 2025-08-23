@@ -6,37 +6,128 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
     <link rel="manifest" href="site.webmanifest" />
-    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5" />
-    <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-polyfills/0.1.43/polyfill.min.js" integrity="sha512-lvWiOP+aMKHllm4THsjzNleVuGOh0WGniJ3lgu/nvCbex1LlaQSxySUjAu/LTJw9FhnSL/PVYoQcckg1Q03+fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.js" integrity="sha512-O7kHS9ooekX8EveiC94z9xSvD/4xt10Qigl6uEKvspYykdux3Ci5QNu5fwi4ca0ZkZI/oCgx5ja8RklWUEqzxQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css" integrity="sha512-D2c/nmSVlwoZk29SLwJK8GkLyCyPuNbZ/vZQL/lNzw+o+yXzsbnJt7lK/iCfdBmgyLRDi0qx27gpE8Zb1C6I7g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#0077ee" />
+    <meta name="msapplication-TileColor" content="#0077ee" />
+    <meta name="theme-color" content="#000000" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/js-polyfills/0.1.43/polyfill.min.js"
+      integrity="sha512-lvWiOP+aMKHllm4THsjzNleVuGOh0WGniJ3lgu/nvCbex1LlaQSxySUjAu/LTJw9FhnSL/PVYoQcckg1Q03+fQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.js"
+      integrity="sha512-O7kHS9ooekX8EveiC94z9xSvD/4xt10Qigl6uEKvspYykdux3Ci5QNu5fwi4ca0ZkZI/oCgx5ja8RklWUEqzxQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css"
+      integrity="sha512-D2c/nmSVlwoZk29SLwJK8GkLyCyPuNbZ/vZQL/lNzw+o+yXzsbnJt7lK/iCfdBmgyLRDi0qx27gpE8Zb1C6I7g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/ol-layerswitcher@4.1.2/dist/ol-layerswitcher.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/ol-layerswitcher@4.1.2/dist/ol-layerswitcher.min.css"
+    />
     <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        new ol.Map({
-          target: 'map',
+      document.addEventListener("DOMContentLoaded", function () {
+        const extent = [-70000.0, -70000.0, 70000.0, 70000.0];
+        const projection = new ol.proj.Projection({
+          code: "CUSTOM:FUEL",
+          units: "pixels",
+          extent: extent,
+          axisOrientation: "neu",
+          global: true,
+          metersPerUnit: 1,
+        });
+
+        ol.proj.addCoordinateTransforms(
+          "EPSG:4326",
+          projection,
+          function (coordinate) {
+            return [coordinate[0], -coordinate[1]];
+          },
+          function (coordinate) {
+            return [coordinate[0], -coordinate[1]];
+          }
+        );
+
+        const map = new ol.Map({
+          target: "map",
           layers: [
             new ol.layer.Tile({
+              source: new ol.source.TileImage({
+                attributions: [
+                  new ol.Attribution({
+                    html: "This map uses imagery, data, and icons extracted from 'Fuel'™ (© 2008 The Codemasters Software Company Limited ('Codemasters')). All rights reserved. 'Codemasters'® is a registered trademark owned by Codemasters. 'Fuel'™ was developed by Asobo Studio S.a.r.l. and published by Codemasters. All trademarks and copyrights are the property of their respective owners. This project is non-commercial and is not affiliated with, endorsed by, or sponsored by Codemasters or Asobo Studio S.a.r.l.",
+                  }),
+                ],
+              }),
+            }),
+            new ol.layer.Tile({
+              title: "Map",
+              visible: true,
               source: new ol.source.XYZ({
-                url: 'tile/{z}/{x}/{y}.png',
+                url: "tile/{z}/{x}/{y}.png",
                 maxZoom: 5,
                 tileSize: 256,
-                wrapX: false
-              })
-            })
+                wrapX: false,
+                projection: projection,
+              }),
+            }),
+            new ol.layer.Vector({
+              title: "POIs",
+              visible: true,
+              source: new ol.source.Vector({
+                url: "geo/poi.json",
+                format: new ol.format.GeoJSON({
+                  dataProjection: projection,
+                }),
+                wrapX: false,
+                projection: projection,
+              }),
+              style: function (feature) {
+                return {
+                  Point: new ol.style.Style({
+                    image: new ol.style.Circle({
+                      radius: 5,
+                      fill: null,
+                      stroke: new ol.style.Stroke({ color: "red", width: 1 }),
+                    }),
+                  }),
+                }[feature.getGeometry().getType()];
+              },
+            }),
           ],
           view: new ol.View({
             center: [0, 0],
             zoom: 2,
             minZoom: 0,
-            maxZoom: 10
-          })
+            maxZoom: 10,
+            projection: projection,
+            extent: extent,
+          }),
         });
+
+        const layerSwitcher = new LayerSwitcher({
+          reverse: true,
+          groupSelectStyle: "group",
+        });
+        map.addControl(layerSwitcher);
+
+        // map.on("click", function (event) {
+        //   var point = map.getCoordinateFromPixel(event.pixel);
+        //   console.log(point);
+        // });
       });
     </script>
     <style>
-      html, body {
+      html,
+      body {
         margin: 0;
         padding: 0;
         height: 100%;
