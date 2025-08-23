@@ -53,8 +53,6 @@ Whole `fuel_map.webp` image including "Out of Area".
 
 [fuel_map.webp](https://github.com/widberg/fuel-map/blob/master/fuel_map.webp?raw=true) - uncompressed 8192x8192 pixel map image (~66 MB)
 
-[roads.txt](https://github.com/widberg/fuel-map/blob/master/roads.txt?raw=true) - dump of the road data (~52 MB)
-
 [binary_maps](https://github.com/widberg/fuel-map/blob/master/docs/binary_maps) - visualizations of the height and terrain type maps
 
-Hubs, Liveries, Races, etc. can be gathered from the game's tsc files.
+[geogen.py](https://github.com/widberg/fuel-map/blob/master/geogen.py) - script to gather hubs, liveries, races, etc. from the game's tsc, DPC, and exe files into GeoJSON files.

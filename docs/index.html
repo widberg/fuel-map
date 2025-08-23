@@ -159,6 +159,19 @@
               title: "Points of Interest",
               layers: [
                 new ol.layer.Vector({
+                  title: "Heliports",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/teleport.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
                   title: "Vista Points",
                   visible: true,
                   source: new ol.source.Vector({
@@ -185,10 +198,10 @@
                   style: style,
                 }),
                 new ol.layer.Vector({
-                  title: "Heliports",
+                  title: "Camps",
                   visible: true,
                   source: new ol.source.Vector({
-                    url: "geo/teleport.geojson",
+                    url: "geo/hub.geojson",
                     format: new ol.format.GeoJSON({
                       dataProjection: projection,
                     }),
@@ -197,32 +210,11 @@
                   }),
                   style: style,
                 }),
-                new ol.layer.Vector({
-                  title: "Career Races",
-                  visible: true,
-                  source: new ol.source.Vector({
-                    url: "geo/career.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: projection,
-                    }),
-                    wrapX: false,
-                    projection: projection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Challenge Races",
-                  visible: true,
-                  source: new ol.source.Vector({
-                    url: "geo/challenge.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: projection,
-                    }),
-                    wrapX: false,
-                    projection: projection,
-                  }),
-                  style: style,
-                }),
+              ],
+            }),
+            new ol.layer.Group({
+              title: "Races",
+              layers: [
                 new ol.layer.Vector({
                   title: "Indian Races",
                   visible: false,
@@ -250,10 +242,23 @@
                   style: style,
                 }),
                 new ol.layer.Vector({
-                  title: "Camps",
+                  title: "Challenge Races",
                   visible: true,
                   source: new ol.source.Vector({
-                    url: "geo/hub.geojson",
+                    url: "geo/challenge.geojson",
+                    format: new ol.format.GeoJSON({
+                      dataProjection: projection,
+                    }),
+                    wrapX: false,
+                    projection: projection,
+                  }),
+                  style: style,
+                }),
+                new ol.layer.Vector({
+                  title: "Career Races",
+                  visible: true,
+                  source: new ol.source.Vector({
+                    url: "geo/career.geojson",
                     format: new ol.format.GeoJSON({
                       dataProjection: projection,
                     }),
