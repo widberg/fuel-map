@@ -18,7 +18,6 @@ with open(FUEL_DIR + "GameTsc/Story/poi.tsc", "r") as input:
                 features_vp.append(
                     Feature(
                         geometry=Point((float(parts[2]), float(parts[3]))),
-                        properties={"category": "vp", "trtext": int(parts[1])},
                     )
                 )
             elif parts[0] == '"Teleport"':
@@ -26,7 +25,6 @@ with open(FUEL_DIR + "GameTsc/Story/poi.tsc", "r") as input:
                 features_teleport.append(
                     Feature(
                         geometry=Point((float(parts[2]), float(parts[3]))),
-                        properties={"category": "teleport"},
                     )
                 )
             else:
@@ -52,7 +50,6 @@ with open(FUEL_DIR + "GameTsc/Story/hubinfos.tsc", "r") as input:
                 features_livery.append(
                     Feature(
                         geometry=Point((float(parts[6]), float(parts[7]))),
-                        properties={"category": "livery", "trtext": int(parts[3])},
                     )
                 )
             else:
@@ -75,14 +72,12 @@ with open(FUEL_DIR + "GameTsc/Story/miss_official.tsc", "r") as input:
                 features_hidden.append(
                     Feature(
                         geometry=Point((float(parts[0]), float(parts[2]))),
-                        properties={"category": "hidden"},
                     )
                 )
             else:
                 features_career.append(
                     Feature(
                         geometry=Point((float(parts[0]), float(parts[2]))),
-                        properties={"category": "career"},
                     )
                 )
     bigfile_races = [
@@ -106,7 +101,6 @@ with open(FUEL_DIR + "GameTsc/Story/miss_official.tsc", "r") as input:
         features_career.append(
             Feature(
                 geometry=Point((float(bigfile_race[0]), float(bigfile_race[2]))),
-                properties={"category": "career"},
             )
         )
     with open("docs/geo/career.geojson", "w") as output:
@@ -123,7 +117,6 @@ with open(FUEL_DIR + "GameTsc/Story/missChallenge.tsc", "r") as input:
             features_challenge.append(
                 Feature(
                     geometry=Point((float(parts[0]), float(parts[2]))),
-                    properties={"category": "challenge"},
                 )
             )
     with open("docs/geo/challenge.geojson", "w") as output:
@@ -140,7 +133,6 @@ with open(FUEL_DIR + "GameTsc/Story/indianMissions.tsc", "r") as input:
             features_indian.append(
                 Feature(
                     geometry=Point((float(parts[0]), float(parts[2]))),
-                    properties={"category": "indian"},
                 )
             )
     with open("docs/geo/indian.geojson", "w") as output:
@@ -214,7 +206,6 @@ with open("docs/geo/hub.geojson", "w") as output:
         features_hub.append(
             Feature(
                 geometry=Point((hub_coordinate[0], hub_coordinate[2])),
-                properties={"category": "hub"},
             )
         )
     geojson.dump(FeatureCollection(features_hub), output, separators=(",", ":"))
@@ -248,7 +239,6 @@ with open(
         features_zone.append(
             Feature(
                 geometry=Polygon([vertices]),
-                properties={"category": "zone"},
             )
         )
     with open("docs/geo/zone.geojson", "w") as output:
@@ -265,10 +255,7 @@ with open(
         t = road["type"]
         category = t["sub_type"].lower()
         short_cut = t["short_cut"]
-        feature = Feature(
-            geometry=LineString(road["points"]),
-            properties={"category": category, "short_cut": short_cut},
-        )
+        feature = Feature(geometry=LineString(road["points"]))
         if category in features_road:
             features_road[category].append(feature)
         else:
@@ -307,7 +294,6 @@ with open("docs/geo/waterbody.geojson", "w") as output:
                         ]
                     ]
                 ),
-                properties={"category": "waterbody"},
             )
         )
     geojson.dump(FeatureCollection(features_water), output, separators=(",", ":"))
@@ -342,7 +328,6 @@ with open("docs/geo/pool.geojson", "w") as output:
                         ]
                     ]
                 ),
-                properties={"category": "pool"},
             )
         )
     geojson.dump(FeatureCollection(features_water), output, separators=(",", ":"))

@@ -68,55 +68,94 @@
           }
         );
 
-        function style(feature) {
-          const river_color = [58, 97, 131, 255];
-          const river_width = 2;
-          const trail_color = [199, 93, 57, 255];
-          const trail_width = 2;
-          const road_color = [206, 207, 206, 255];
-          const road_width = 3;
-          const highway_color = road_color;
-          const highway_width = 5;
-          const short_cut_color = [0, 0, 0, 128];
-          const short_cut_width = 1;
-
-          return {
-            Point: new ol.style.Style({
-              image: new ol.style.Icon({
-                src: `img/${feature.get("category")}.png`,
-                width: 35,
+        function createGeoJSONVectorImageLayer(
+          title,
+          basename,
+          style,
+          visible = true,
+          minZoom = undefined
+        ) {
+          return new ol.layer.VectorImage({
+            title: title,
+            visible: visible,
+            minZoom: minZoom,
+            source: new ol.source.Vector({
+              url: `geo/${basename}.geojson`,
+              format: new ol.format.GeoJSON({
+                dataProjection: dataProjection,
               }),
+              wrapX: false,
+              projection: dataProjection,
+              overlaps: false,
             }),
-            LineString: new ol.style.Style({
-              stroke: new ol.style.Stroke({
-                color: "green",
-                width: 1,
-              }),
-            }),
-            Polygon: {
-              waterbody: new ol.style.Style({
-                fill: new ol.style.Fill({
-                  color: [0, 0, 256, 256],
-                }),
-              }),
-              pool: new ol.style.Style({
-                fill: new ol.style.Fill({
-                  color: [173, 216, 230, 256],
-                }),
-              }),
-              zone: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                  color: [0, 0, 0, 255],
-                  width: 3,
-                }),
-              }),
-            }[feature.get("category")],
-          }[feature.getGeometry().getType()];
+            style: style,
+          });
         }
+
+        function createGeoJSONVectorLayer(
+          title,
+          basename,
+          style,
+          visible = true,
+          minZoom = undefined
+        ) {
+          return new ol.layer.Vector({
+            title: title,
+            visible: visible,
+            minZoom: minZoom,
+            source: new ol.source.Vector({
+              url: `geo/${basename}.geojson`,
+              format: new ol.format.GeoJSON({
+                dataProjection: dataProjection,
+              }),
+              wrapX: false,
+              projection: dataProjection,
+              overlaps: false,
+            }),
+            style: style,
+          });
+        }
+
+        function createGeoJSONVectorLayerIcon(title, basename, visible = true) {
+          return createGeoJSONVectorLayer(
+            title,
+            basename,
+            {
+              "icon-src": `img/${basename}.png`,
+              "icon-width": 35,
+            },
+            visible
+          );
+        }
+
+        const thin_trail_style = {
+          "stroke-color": [199, 93, 57, 255],
+          "stroke-width": 1,
+        };
+
+        const trail_style = {
+          "stroke-color": [199, 93, 57, 255],
+          "stroke-width": 2,
+        };
+
+        const road_style_color = [206, 207, 206, 255];
+        const road_style = {
+          "stroke-color": road_style_color,
+          "stroke-width": 3,
+        };
+
+        const highway_style = {
+          "stroke-color": road_style_color,
+          "stroke-width": 5,
+        };
+
+        const shortcut_style = {
+          "stroke-color": [128, 128, 128, 128],
+          "stroke-width": 3,
+        };
 
         const map = new ol.Map({
           target: "map",
-          renderer: ["webgl", "canvas"],
           layers: [
             new ol.layer.Tile({
               source: new ol.source.TileImage({
@@ -138,442 +177,169 @@
             new ol.layer.Group({
               title: "Water",
               layers: [
-                new ol.layer.Vector({
-                  title: "Waterbodies",
-                  visible: false,
-                  source: new ol.source.Vector({
-                    url: "geo/waterbody.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Pools",
-                  visible: false,
-                  source: new ol.source.Vector({
-                    url: "geo/pool.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Rivers",
-                  visible: true,
-                  minZoom: 7,
-                  source: new ol.source.Vector({
-                    url: "geo/river.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
+                createGeoJSONVectorLayer(
+                  "Waterbodies",
+                  "waterbody",
+                  { "fill-color": [0, 0, 255, 255] },
+                  false
+                ),
+                createGeoJSONVectorLayer(
+                  "Pools",
+                  "pool",
+                  { "fill-color": [173, 216, 230, 255] },
+                  false
+                ),
+                createGeoJSONVectorImageLayer(
+                  "Rivers",
+                  "river",
+                  {
+                    "stroke-color": [58, 97, 131, 255],
+                    "stroke-width": 2,
+                  },
+                  true,
+                  5
+                ),
               ],
             }),
             new ol.layer.Group({
               title: "Roads",
               layers: [
                 new ol.layer.Group({
-                  title: "Small Dirt Roads",
-                  minZoom: 8,
+                  title: "Shortcuts",
+                  minZoom: 5,
                   layers: [
-                    new ol.layer.Vector({
-                      title: "Double Wide Dirt Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/bigtarmacroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Steep Double Wide Dirt Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/saltroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Circuit Track",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/circuittrack.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Goat Path",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/goatpath.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Thin Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/snowydirtroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Tiny Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/fieldroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
+                    createGeoJSONVectorImageLayer(
+                      "Shortcut Short",
+                      "shortcutshort",
+                      shortcut_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Shortcut Long",
+                      "shortcutlong",
+                      shortcut_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Shortcut Field",
+                      "shortcutfield",
+                      shortcut_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Shortcut Forest",
+                      "shortcutforest",
+                      shortcut_style
+                    ),
                   ],
                 }),
                 new ol.layer.Group({
-                  title: "Shortcuts",
-                  minZoom: 8,
+                  title: "Small Dirt Roads",
+                  minZoom: 5,
                   layers: [
-                    new ol.layer.Vector({
-                      title: "Shortcut Short",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/shortcutshort.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Shortcut Long",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/shortcutlong.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Shortcut Field",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/shortcutfield.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Shortcut Forest",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/shortcutforest.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
+                    createGeoJSONVectorImageLayer(
+                      "Thin Dirt Road",
+                      "snowydirtroad",
+                      thin_trail_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Tiny Dirt Road",
+                      "fieldroad",
+                      thin_trail_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Steep Double Wide Dirt Road",
+                      "saltroad",
+                      trail_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Goat Path",
+                      "goatpath",
+                      trail_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Double Wide Dirt Road",
+                      "bigtarmacroad",
+                      road_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Circuit Track",
+                      "circuittrack",
+                      road_style
+                    ),
                   ],
                 }),
                 new ol.layer.Group({
                   title: "Big Dirt Roads",
-                  minZoom: 7,
+                  minZoom: 4,
                   layers: [
-                    new ol.layer.Vector({
-                      title: "Big Dirt Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/smalldirtroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Another Big Dirt Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/bigdirtroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Small Tarmac Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/smalltarmacroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Normal Dirt Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/normaldirtroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                  ],
-                }),
-                new ol.layer.Group({
-                  title: "Collector Roads",
-                  minZoom: 5,
-                  layers: [
-                    new ol.layer.Vector({
-                      title: "Bridges",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/bridge.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Alternate Paved Route",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/smallcircuittrack.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
-                    new ol.layer.Vector({
-                      title: "Normal Tarmac Road",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/normaltarmacroad.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
+                    createGeoJSONVectorImageLayer(
+                      "Normal Dirt Road",
+                      "normaldirtroad",
+                      trail_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Big Dirt Road",
+                      "smalldirtroad",
+                      trail_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Another Big Dirt Road",
+                      "bigdirtroad",
+                      trail_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Small Tarmac Road",
+                      "smalltarmacroad",
+                      road_style
+                    ),
                   ],
                 }),
                 new ol.layer.Group({
                   title: "Major Roads",
-                  minZoom: 3,
+                  minZoom: 2,
                   layers: [
-                    new ol.layer.Vector({
-                      title: "Highways",
-                      visible: true,
-                      source: new ol.source.Vector({
-                        url: "geo/highway.geojson",
-                        format: new ol.format.GeoJSON({
-                          dataProjection: dataProjection,
-                        }),
-                        wrapX: false,
-                        projection: dataProjection,
-                      }),
-                      style: style,
-                    }),
+                    createGeoJSONVectorImageLayer(
+                      "Alternate Paved Route",
+                      "smallcircuittrack",
+                      road_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Normal Tarmac Road",
+                      "normaltarmacroad",
+                      road_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Bridges",
+                      "bridge",
+                      road_style
+                    ),
+                    createGeoJSONVectorImageLayer(
+                      "Highways",
+                      "highway",
+                      highway_style
+                    ),
                   ],
                 }),
               ],
             }),
-            new ol.layer.Vector({
-              title: "Zones",
-              visible: true,
-              source: new ol.source.Vector({
-                url: "geo/zone.geojson",
-                format: new ol.format.GeoJSON({
-                  dataProjection: dataProjection,
-                }),
-                wrapX: false,
-                projection: dataProjection,
-              }),
-              style: style,
+            createGeoJSONVectorLayer("Zones", "zone", {
+              "stroke-color": [0, 0, 0, 255],
+              "stroke-width": 3,
             }),
             new ol.layer.Group({
               title: "Points of Interest",
               layers: [
-                new ol.layer.Vector({
-                  title: "Heliports",
-                  visible: true,
-                  source: new ol.source.Vector({
-                    url: "geo/teleport.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Vista Points",
-                  visible: true,
-                  source: new ol.source.Vector({
-                    url: "geo/vp.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Liveries",
-                  visible: true,
-                  source: new ol.source.Vector({
-                    url: "geo/livery.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Camps",
-                  visible: true,
-                  source: new ol.source.Vector({
-                    url: "geo/hub.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
+                createGeoJSONVectorLayerIcon("Heliports", "teleport"),
+                createGeoJSONVectorLayerIcon("Vista Points", "vp"),
+                createGeoJSONVectorLayerIcon("Liveries", "livery"),
+                createGeoJSONVectorLayerIcon("Camps", "hub"),
               ],
             }),
             new ol.layer.Group({
               title: "Races",
               layers: [
-                new ol.layer.Vector({
-                  title: "Indian Races",
-                  visible: false,
-                  source: new ol.source.Vector({
-                    url: "geo/indian.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Hidden Races",
-                  visible: false,
-                  source: new ol.source.Vector({
-                    url: "geo/hidden.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Challenge Races",
-                  visible: true,
-                  source: new ol.source.Vector({
-                    url: "geo/challenge.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
-                new ol.layer.Vector({
-                  title: "Career Races",
-                  visible: true,
-                  source: new ol.source.Vector({
-                    url: "geo/career.geojson",
-                    format: new ol.format.GeoJSON({
-                      dataProjection: dataProjection,
-                    }),
-                    wrapX: false,
-                    projection: dataProjection,
-                  }),
-                  style: style,
-                }),
+                createGeoJSONVectorLayerIcon("Indian Races", "indian", false),
+                createGeoJSONVectorLayerIcon("Hidden Races", "hidden", false),
+                createGeoJSONVectorLayerIcon("Challenge Races", "challenge"),
+                createGeoJSONVectorLayerIcon("Career Races", "career"),
               ],
             }),
           ],
