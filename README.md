@@ -4,6 +4,10 @@ Notes and assets related to FUEL's map.
 
 <sup>This repository is a relative of the main [FMTK repository](https://github.com/widberg/fmtk).</sup>
 
+## Getting Started
+
+View the map online at https://widberg.me/fuel-map/
+
 ## Notes
 
 See also: [FMTK Map wiki entry](https://github.com/widberg/fmtk/wiki/Map).

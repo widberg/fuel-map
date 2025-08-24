@@ -85,6 +85,30 @@ with open(FUEL_DIR + "GameTsc/Story/miss_official.tsc", "r") as input:
                         properties={"category": "career"},
                     )
                 )
+    bigfile_races = [
+        [-53117.105, 549.02264, -57637.016],
+        [-602.63104, 4486.872, -47722.227],
+        [219.88562, 2129.4058, -2537.249],
+        [-51271.51, 767.25726, -30357.008],
+        [-28212.785, 2409.7761, 46668.15],
+        [50543.44, 709.0713, -55545.203],
+        [-53541.695, 1200.7836, -28881.627],
+        [48365.617, 1049.2428, 29687.84],
+        [-51189.98, 2930.2178, 32642.328],
+        [45817.03, 1169.8441, -6161.855],
+        [27919.1, 1121.7856, 50266.53],
+        [-53478.355, 983.0904, 556.0714],
+        [40246.16, 790.63446, -22305.246],
+        [4270.625, 1288.0563, 35476.7],
+        [23902.373, 1071.4288, -50468.008],
+    ]
+    for bigfile_race in bigfile_races:
+        features_career.append(
+            Feature(
+                geometry=Point((float(bigfile_race[0]), float(bigfile_race[2]))),
+                properties={"category": "career"},
+            )
+        )
     with open("docs/geo/career.geojson", "w") as output:
         geojson.dump(FeatureCollection(features_career), output, separators=(",", ":"))
     with open("docs/geo/hidden.geojson", "w") as output:
