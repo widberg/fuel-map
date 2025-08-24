@@ -257,19 +257,28 @@ with open(
 with open(
     USA1_DIR + "resources/$-392451512$EmpowerHugeViolin.GwRoad_Z.d/resource.json", "r"
 ) as input:
-    features_road = []
+    features_road = {}
     j = json.load(input)
     roads = j["class"]["GwRoad"]["GwRoadV1_381_67_09PC"]["body"]["roads"]
     print(f"{len(roads)} roads")
     for road in roads:
-        features_road.append(
-            Feature(
-                geometry=LineString(road["points"]),
-                properties={"category": "road"},
-            )
+        t = road["type"]
+        category = t["sub_type"].lower()
+        short_cut = t["short_cut"]
+        feature = Feature(
+            geometry=LineString(road["points"]),
+            properties={"category": category, "short_cut": short_cut},
         )
-    with open("docs/geo/road.geojson", "w") as output:
-        geojson.dump(FeatureCollection(features_road), output, separators=(",", ":"))
+        if category in features_road:
+            features_road[category].append(feature)
+        else:
+            features_road[category] = [feature]
+
+    print(features_road.keys())
+
+    for category, features in features_road.items():
+        with open(f"docs/geo/{category}.geojson", "w") as output:
+            geojson.dump(FeatureCollection(features), output, separators=(",", ":"))
 
 with open("docs/geo/waterbody.geojson", "w") as output:
     features_water = []
