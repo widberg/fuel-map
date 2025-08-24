@@ -1,6 +1,7 @@
 import geojson
 from geojson import Feature, Point, FeatureCollection, LineString, Polygon
 import json
+import math
 import shlex
 
 FUEL_DIR = "D:/steamcmd/steamapps/common/FUEL/"
@@ -120,6 +121,82 @@ with open(FUEL_DIR + "GameTsc/Story/indianMissions.tsc", "r") as input:
             )
     with open("docs/geo/indian.geojson", "w") as output:
         geojson.dump(FeatureCollection(features_indian), output, separators=(",", ":"))
+
+
+def polygon_vertex_loop(vertices, edges, polygon_edge_indices):
+    if not polygon_edge_indices:
+        return []
+
+    e0 = edges[polygon_edge_indices[0]]
+    loop = [e0[0], e0[1]]
+    used_edges = {polygon_edge_indices[0]}
+
+    while len(loop) <= len(polygon_edge_indices):
+        extended = False
+        for i in polygon_edge_indices:
+            if i in used_edges:
+                continue
+            v1, v2 = edges[i]
+            if loop[-1] == v1:
+                loop.append(v2)
+                used_edges.add(i)
+                extended = True
+                break
+            elif loop[-1] == v2:
+                loop.append(v1)
+                used_edges.add(i)
+                extended = True
+                break
+            elif loop[0] == v1:
+                loop.insert(0, v2)
+                used_edges.add(i)
+                extended = True
+                break
+            elif loop[0] == v2:
+                loop.insert(0, v1)
+                used_edges.add(i)
+                extended = True
+                break
+        if not extended:
+            raise ValueError("Edges do not form a proper loop")
+
+    return loop
+
+
+with open(
+    USA1_DIR + "resources/$-1311324211$WhaleForceSuggest.GenWorld_Z.d/resource.json",
+    "r",
+) as input:
+    features_zone = []
+    j = json.load(input)
+    body = j["class"]["GenWorld"]["GenWorldV1_381_67_09PC"]["body"]
+    zone_vertices = body["region_vertices"]
+    zone_edges = body["region_edges"]
+    zones = body["regions"]
+    print(zone_vertices)
+
+    for name, zone in zones.items():
+        vertex_indices = polygon_vertex_loop(
+            zone_vertices,
+            [
+                [e["region_vertices_index_a"], e["region_vertices_index_b"]]
+                for e in zone_edges
+            ],
+            zone["region_edges_indices"],
+        )
+
+        vertices = []
+        for vertex_index in vertex_indices:
+            vertices.append(zone_vertices[vertex_index])
+
+        features_zone.append(
+            Feature(
+                geometry=Polygon([vertices]),
+                properties={"category": "zone"},
+            )
+        )
+    with open("docs/geo/zone.geojson", "w") as output:
+        geojson.dump(FeatureCollection(features_zone), output, separators=(",", ":"))
 
 with open(
     USA1_DIR + "resources/$-392451512$EmpowerHugeViolin.GwRoad_Z.d/resource.json", "r"

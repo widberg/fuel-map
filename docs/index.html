@@ -46,7 +46,7 @@
           metersPerUnit: metersPerUnit,
         });
 
-        ol.proj.setUserProjection(dataProjection)
+        ol.proj.setUserProjection(dataProjection);
 
         const viewProjection = new ol.proj.Projection({
           code: "CUSTOM:FUEL_VIEW_PROJECTION",
@@ -79,17 +79,27 @@
             LineString: new ol.style.Style({
               stroke: new ol.style.Stroke({
                 color: "green",
-                width: 4,
+                width: 1,
               }),
             }),
-            Polygon: new ol.style.Style({
-              fill: new ol.style.Fill({
-                color: {
-                  waterbody: [0, 0, 256, 256],
-                  pool: [173, 216, 230, 256],
-                }[feature.get("category")],
+            Polygon: {
+              waterbody: new ol.style.Style({
+                fill: new ol.style.Fill({
+                  color: [0, 0, 256, 256],
+                }),
               }),
-            }),
+              pool: new ol.style.Style({
+                fill: new ol.style.Fill({
+                  color: [173, 216, 230, 256],
+                }),
+              }),
+              zone: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                  color: [0, 0, 0, 255],
+                  width: 3,
+                }),
+              }),
+            }[feature.get("category")],
           }[feature.getGeometry().getType()];
         }
 
@@ -163,6 +173,19 @@
                   style: style,
                 }),
               ],
+            }),
+            new ol.layer.Vector({
+              title: "Zones",
+              visible: true,
+              source: new ol.source.Vector({
+                url: "geo/zone.geojson",
+                format: new ol.format.GeoJSON({
+                  dataProjection: dataProjection,
+                }),
+                wrapX: false,
+                projection: dataProjection,
+              }),
+              style: style,
             }),
             new ol.layer.Group({
               title: "Points of Interest",
