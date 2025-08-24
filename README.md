@@ -6,6 +6,8 @@ Notes and assets related to FUEL's map.
 
 ## Notes
 
+See also: [FMTK Map wiki entry](https://github.com/widberg/fmtk/wiki/Map).
+
 While some in-game development menus will swap the names of the y and z components, the data is stored in the order of the `Vec3f` struct bellow assuming +Y is up, +X is east, and +Z is south. See the [fmtk wiki Coordinate Systems entry](https://github.com/widberg/fmtk/wiki/Coordinate-Systems) for more information.
 
 ```cpp
@@ -16,6 +18,8 @@ struct Vec3f
     float z;
 };
 ```
+
+The units used in game, and in this project, are "Zouna units". One Zouna unit (`zu`) is equal to one meter (`m`) in FUEL. Everything is represented as `zu`s/`m`s internally and converted to miles and kilometers when needed. Also, speeds are usually represented in terms of seconds and converted to be in terms of hours when needed. More examples of engine defined units can be found on the [Valve Software Developer Community Wiki Unit page](https://developer.valvesoftware.com/wiki/Unit).
 
 -Z is north.
 

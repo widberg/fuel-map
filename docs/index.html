@@ -16,15 +16,15 @@
       referrerpolicy="no-referrer"
     ></script>
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.js"
-      integrity="sha512-O7kHS9ooekX8EveiC94z9xSvD/4xt10Qigl6uEKvspYykdux3Ci5QNu5fwi4ca0ZkZI/oCgx5ja8RklWUEqzxQ=="
+      src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/10.6.1/dist/ol.min.js"
+      integrity="sha512-NEUbbO7KI1OYn+IHcF70vm3ON0obczJz9PJFwxHkfPCsT14UqDD4roG7rF5WpwkXRTPvysFb6Wvw/Tjh5tfv8g=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css"
-      integrity="sha512-D2c/nmSVlwoZk29SLwJK8GkLyCyPuNbZ/vZQL/lNzw+o+yXzsbnJt7lK/iCfdBmgyLRDi0qx27gpE8Zb1C6I7g=="
+      href="https://cdnjs.cloudflare.com/ajax/libs/openlayers/10.6.1/ol.min.css"
+      integrity="sha512-oVyisN6T8O7H9DnBc1w/IipxzLhNvJERKa0Rx9fKEtaodE7UXQAypIHamYzQPAqVxp0pVl25e4spVQWIVfu6eA=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
@@ -36,18 +36,30 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const extent = [-70000.0, -70000.0, 70000.0, 70000.0];
-        const projection = new ol.proj.Projection({
-          code: "CUSTOM:FUEL",
-          units: "pixels",
+        const metersPerUnit = 1;
+        const dataProjection = new ol.proj.Projection({
+          code: "CUSTOM:FUEL_DATA_PROJECTION",
+          units: "m",
+          extent: extent,
+          axisOrientation: "seu",
+          global: true,
+          metersPerUnit: metersPerUnit,
+        });
+
+        ol.proj.setUserProjection(dataProjection)
+
+        const viewProjection = new ol.proj.Projection({
+          code: "CUSTOM:FUEL_VIEW_PROJECTION",
+          units: "m",
           extent: extent,
           axisOrientation: "neu",
           global: true,
-          metersPerUnit: 1,
+          metersPerUnit: metersPerUnit,
         });
 
         ol.proj.addCoordinateTransforms(
-          "EPSG:4326",
-          projection,
+          dataProjection,
+          viewProjection,
           function (coordinate) {
             return [coordinate[0], -coordinate[1]];
           },
@@ -86,11 +98,8 @@
           layers: [
             new ol.layer.Tile({
               source: new ol.source.TileImage({
-                attributions: [
-                  new ol.Attribution({
-                    html: "This map uses imagery, data, and icons extracted from 'Fuel'™ (© 2008 The Codemasters Software Company Limited ('Codemasters')). All rights reserved. 'Codemasters'® is a registered trademark owned by Codemasters. 'Fuel'™ was developed by Asobo Studio S.a.r.l. and published by Codemasters. All trademarks and copyrights are the property of their respective owners. This project is non-commercial and is not affiliated with, endorsed by, or sponsored by Codemasters or Asobo Studio S.a.r.l.",
-                  }),
-                ],
+                attributions:
+                  "This map uses imagery, data, and icons extracted from 'Fuel'™ (© 2008 The Codemasters Software Company Limited ('Codemasters')). All rights reserved. 'Codemasters'® is a registered trademark owned by Codemasters. 'Fuel'™ was developed by Asobo Studio S.a.r.l. and published by Codemasters. All trademarks and copyrights are the property of their respective owners. This project is non-commercial and is not affiliated with, endorsed by, or sponsored by Codemasters or Asobo Studio S.a.r.l.",
               }),
             }),
             new ol.layer.Tile({
@@ -101,7 +110,7 @@
                 maxZoom: 5,
                 tileSize: 256,
                 wrapX: false,
-                projection: projection,
+                projection: viewProjection,
               }),
             }),
             new ol.layer.Group({
@@ -109,28 +118,28 @@
               visible: false,
               layers: [
                 new ol.layer.Vector({
-                  title: "Waterbody",
+                  title: "Waterbodies",
                   visible: true,
                   source: new ol.source.Vector({
                     url: "geo/waterbody.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
                 new ol.layer.Vector({
-                  title: "Pool",
+                  title: "Pools",
                   visible: true,
                   source: new ol.source.Vector({
                     url: "geo/pool.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -146,10 +155,10 @@
                   source: new ol.source.Vector({
                     url: "geo/road.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -164,10 +173,10 @@
                   source: new ol.source.Vector({
                     url: "geo/teleport.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -177,10 +186,10 @@
                   source: new ol.source.Vector({
                     url: "geo/vp.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -190,10 +199,10 @@
                   source: new ol.source.Vector({
                     url: "geo/livery.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -203,10 +212,10 @@
                   source: new ol.source.Vector({
                     url: "geo/hub.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -221,10 +230,10 @@
                   source: new ol.source.Vector({
                     url: "geo/indian.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -234,10 +243,10 @@
                   source: new ol.source.Vector({
                     url: "geo/hidden.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -247,10 +256,10 @@
                   source: new ol.source.Vector({
                     url: "geo/challenge.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -260,10 +269,10 @@
                   source: new ol.source.Vector({
                     url: "geo/career.geojson",
                     format: new ol.format.GeoJSON({
-                      dataProjection: projection,
+                      dataProjection: dataProjection,
                     }),
                     wrapX: false,
-                    projection: projection,
+                    projection: dataProjection,
                   }),
                   style: style,
                 }),
@@ -271,12 +280,13 @@
             }),
           ],
           view: new ol.View({
-            center: [0, 0],
+            center: ol.extent.getCenter(extent),
             zoom: 2,
             minZoom: 0,
             maxZoom: 10,
-            projection: projection,
+            projection: viewProjection,
             extent: extent,
+            constrainOnlyCenter: true,
           }),
         });
 
@@ -288,7 +298,7 @@
 
         map.on("click", function (event) {
           var point = map.getCoordinateFromPixel(event.pixel);
-          console.log([point[0], -point[1]]);
+          console.log(point);
         });
       });
     </script>
