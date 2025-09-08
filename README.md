@@ -59,6 +59,15 @@ Whole `fuel_map.webp` image including "Out of Area".
           +Z | +70000.0
 </pre>
 
+Past the +/-70000.0 point the height and biome maps become mirrored and continue, until you hit the end of the mirror world and it mirrors again, forever, or until your computer melts. I presume the reason it mirrors instead of wrapping is to prevent sharp changes in terrain at the edges, even though the game would kill you long before you make it that far. I theorize that due to floating point precision decreasing as your actual position becomes very high, the world would become less detailed as it sampled the same points in the height map for what would have been multiple distinct coordinates in a mirror world closer to the real world, but I haven't actually checked yet. Also, since things like WorldRef_Z, GwRoads_Z, and bodies of water all use actual positions you won't find them in the other worlds. And remember that this is just an artifact of how the game samples the height and biome maps, it isn't actually mirroring the coordinate systems, models appear correctly and north is still in the negative Z direction. A simple Python function that converts actual positions along an axis to the corresponding position in the real world, accounting for the repeated mirroring:
+
+```python
+def mirrored_position(n: float) -> float:
+    return -70000 + 140000 - abs(((n + 70000) % 280000) - 140000)
+```
+
+At this point it should be obvious that this coordinate system maps actual positions to real world positions via a triangle wave of amplitude 70,000 and period 280,000, shifted so that it oscillates between –70,000 and +70,000.
+
 [fuel_map.webp](https://github.com/widberg/fuel-map/blob/master/fuel_map.webp?raw=true) - uncompressed 8192x8192 pixel map image (~66 MB)
 
 [binary_maps](https://github.com/widberg/fuel-map/blob/master/docs/binary_maps) - visualizations of the height and terrain type maps
